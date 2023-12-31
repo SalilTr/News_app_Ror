@@ -1,0 +1,117 @@
+<style>
+  body {
+    font-family: Arial, sans-serif;
+  }
+
+  .center-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh; /* Adjust as needed */
+  }
+
+  .post {
+    margin-bottom: 20px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 600px; /* Adjust as needed */
+    text-align: left;
+  }
+
+  table {
+    margin-top: 20px; /* Adjust as needed */
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+
+ 
+
+  .thumbnail-image {
+    max-width: 100px;
+    max-height: 100px;
+  }
+</style>
+
+<div class="center-content">
+  <div class="post">
+    <h1>News Articles</h1>
+
+    <% if user_signed_in? %>
+      <div>
+        Welcome <%= current_user.email %>, Roles: <%= current_user.roles.map(&:name).join(', ') %> <!-- Display the user's roles -->
+        <%= button_to "Sign out", destroy_user_session_path, method: :delete %>
+      </div>
+    <% else %>
+      <%= button_to "Sign in", new_user_session_path %>
+    <% end %>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Sub-Topic</th>
+          <th>Content</th>
+          <th>Images</th>
+          <th>Category</th>
+          <th>User</th>
+          <th>Actions</th>
+          <th></th> <!-- Add an empty th for the extra column in the header -->
+        </tr>
+      </thead>
+
+      <tbody>
+        <% @news_articles.each do |news_article| %>
+          <tr>
+            <td><%= news_article.title %></td>
+            <td><%= news_article.sub_topic %></td>
+            <td><%= news_article.content %></td>
+
+            <td>
+              <% if news_article.images.attached? %>
+                <div id="carouselExample<%= news_article.id %>" class="carousel slide" data-ride="carousel">
+                  <div class="carousel-inner">
+                    <% news_article.images.each_with_index do |image, index| %>
+                      <div class="carousel-item <%= index.zero? ? 'active' : '' %>">
+                        <%= image_tag url_for(image), class: "thumbnail-image" %>
+                      </div>
+                    <% end %>
+                  </div>
+                  <a class="carousel-control-prev" href="#carouselExample<%= news_article.id %>" role="button" data-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Previous</span>
+                  </a>
+                  <a class="carousel-control-next" href="#carouselExample<%= news_article.id %>" role="button" data-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Next</span>
+                  </a>
+                </div>
+              <% end %>
+            </td>
+
+            <td class="category">
+              <%= news_article.category&.name if news_article.category %>
+            </td>
+
+            <td><%= news_article.user.email if news_article.user %></td>
+            <td>
+              <%= link_to 'Show', news_article %><br>
+              <%= link_to 'Edit', edit_news_article_path(news_article) %><br>
+              <%= link_to "Delete", news_article_path(news_article), data: { "turbo-method": :delete, confirm: 'Are you sure?' } %>
+            </td>
+            <td></td> <!-- Add an empty td for the extra column in the body -->
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+    <%= link_to 'New News Article', new_news_article_path %>
+  </div>
+</div>
